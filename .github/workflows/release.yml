@@ -26,3 +26,16 @@ jobs:
 
       - name: Build VSIX Package
         run: vsce package  # 生成 .vsix 文件（默认输出格式为 NAME-VERSION.vsix）
+  
+      - name: 上传Release文件
+        uses: softprops/action-gh-release@v2.2.1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          tag_name: ${{ github.ref }}
+          name: Release ${{ github.ref }}
+          body: New Release.
+          draft: false
+          prerelease: false
+          files: |
+            code-kanban-${{ github.ref }}.vsix
+          
