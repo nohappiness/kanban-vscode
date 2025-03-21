@@ -1,7 +1,7 @@
 /*
  * @Date: 2025-03-19 21:24:35
  * @LastEditors: Zhang Yueqian<zhangyueqian@antiy.cn>
- * @LastEditTime: 2025-03-20 19:40:48
+ * @LastEditTime: 2025-03-20 22:29:18
  * @FilePath: /code-kanban/src/extension.ts
  */
 // The module 'vscode' contains the VS Code extensibility API
@@ -84,13 +84,20 @@ export function activate(context: vscode.ExtensionContext) {
         // The command has been defined in the package.json file
         // Now provide the implementation of the command with registerCommand
         // The commandId parameter must match the command field in package.json
-        const disposable = vscode.commands.registerCommand("code-kanban.helloWorld", () => {
+        const initCommand = vscode.commands.registerCommand("code-kanban.init", () => {
                 // The code you place here will be executed every time your command is executed
                 // Display a message box to the user
-                vscode.window.showInformationMessage("Hello VS-Code!");
+                if (!workspaceRoot) {
+                        vscode.window.showInformationMessage("No workspace open");
+                        return;
+                }
+                const projectsFilePath = path.join(workspaceRoot, "Projects.md");
+
+                fs.writeFileSync(projectsFilePath, "# Project One\n\n# Project Two");
+                vscode.window.showInformationMessage("Projects file created");
         });
 
-        context.subscriptions.push(disposable);
+        context.subscriptions.push(initCommand);
 }
 
 // This method is called when your extension is deactivated

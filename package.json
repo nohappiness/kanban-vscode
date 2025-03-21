@@ -14,7 +14,11 @@
                         "name": "Zhang Yueqian"
                 }
         ],
-        "version": "0.0.1",
+        "repository": {
+                "type": "git",
+                "url": "https://github.com/nohappiness/kanba-vscode.git"
+        },
+        "version": "0.0.2",
         "engines": {
                 "vscode": "^1.98.0"
         },
@@ -49,10 +53,17 @@
                                 }
                         ]
                 },
+                "viewsWelcome": [
+                        {
+                                "view": "kanban.projects",
+                                "contents": "Welcome to the Kanban board!\n Here you can manage your projects and tasks. Start by creating a new project and adding tasks to it.\n[Create Projects.md](command:code-kanban.init)\n",
+                                "when": "true"
+                        }
+                ],
                 "commands": [
                         {
-                                "command": "code-kanban.helloWorld",
-                                "title": "Hello World"
+                                "command": "code-kanban.init",
+                                "title": "Init Projects.md"
                         },
                         {
                                 "command": "kanban.projects.focus",
