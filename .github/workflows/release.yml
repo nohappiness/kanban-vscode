@@ -28,7 +28,10 @@ jobs:
                           run: vsce package # 生成 .vsix 文件（默认输出格式为 NAME-VERSION.vsix）
 
                         - name: Upload Artifact
-                          uses: actions/upload-artifact@v4
+                          uses: softprops/action-gh-release@v1
+                          if: startsWith(github.ref, 'refs/tags/')
                           with:
-                                  name: extension.vsix
-                                  path: "*.vsix" # 上传生成的 .vsix 文件
+                                  draft: false
+                                  prerelease: false
+                                  files: |
+                                          *.vsix
