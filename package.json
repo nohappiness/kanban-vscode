@@ -71,8 +71,7 @@
                         }
                 ],
                 "activationEvents": [
-                        "onStartupFinished",
-                        "onCommand:code-kanban.helloWorld"
+                        "onCommand:code-kanban.init"
                 ]
         },
         "keybindings": [

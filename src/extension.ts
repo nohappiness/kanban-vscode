@@ -1,7 +1,7 @@
 /*
  * @Date: 2025-03-19 21:24:35
  * @LastEditors: Zhang Yueqian<zhangyueqian@antiy.cn>
- * @LastEditTime: 2025-03-20 22:29:18
+ * @LastEditTime: 2025-03-21 09:34:45
  * @FilePath: /code-kanban/src/extension.ts
  */
 // The module 'vscode' contains the VS Code extensibility API
@@ -9,6 +9,8 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
 import * as path from "path";
+
+const KANBAN_FILE = ".kanban.json";
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -30,19 +32,18 @@ export class KanbanProjectsProvider implements vscode.TreeDataProvider<vscode.Tr
                                 return [];
                         }
 
-                        const projectsFilePath = path.join(workspaceRoot, "Projects.md");
+                        const projectsFilePath = path.join(workspaceRoot, KANBAN_FILE);
                         if (!fs.existsSync(projectsFilePath)) {
                                 return [];
                         }
 
                         const fileContent = fs.readFileSync(projectsFilePath, "utf8");
-                        const lines = fileContent.split("\n");
+                        const projectsData = JSON.parse(fileContent);
                         const projects: vscode.TreeItem[] = [];
 
-                        for (const line of lines) {
-                                if (line.startsWith("# ")) {
-                                        const projectTitle = line.substring(2);
-                                        projects.push(new vscode.TreeItem(projectTitle));
+                        for (const project of projectsData) {
+                                if ("title" in project) {
+                                        projects.push(new vscode.TreeItem(project["title"]));
                                 }
                         }
 
@@ -57,24 +58,32 @@ export class KanbanProjectsProvider implements vscode.TreeDataProvider<vscode.Tr
         }
 }
 
-const projectsData = new KanbanProjectsProvider();
-
-const workspaceRoot = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
-if (workspaceRoot) {
-        const projectsFilePath = path.join(workspaceRoot, "Projects.md");
-        if (fs.existsSync(projectsFilePath)) {
-                const watcher = vscode.workspace.createFileSystemWatcher(projectsFilePath);
-                watcher.onDidChange(() => {
-                        projectsData.refresh();
-                });
-        }
-}
-
 export function activate(context: vscode.ExtensionContext) {
         // Use the console to output diagnostic information (console.log) and errors (console.error)
         // This line of code will only be executed once when your extension is activated
         console.log('Congratulations, your extension "code-kanban" is now active!');
 
+        // Check if .kanban file exists in the current directory
+        const workspaceRoot = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+        if (!workspaceRoot) {
+                vscode.window.showInformationMessage("No workspace open");
+                return;
+        }
+        const kanbanFilePath = path.join(workspaceRoot, ".kanban");
+        const projectsData = new KanbanProjectsProvider();
+        if (workspaceRoot) {
+                const projectsFilePath = path.join(workspaceRoot, KANBAN_FILE);
+                const watcher = vscode.workspace.createFileSystemWatcher(projectsFilePath);
+                watcher.onDidChange(() => {
+                        projectsData.refresh();
+                });
+                watcher.onDidDelete(() => {
+                        projectsData.refresh();
+                });
+                watcher.onDidCreate(() => {
+                        projectsData.refresh();
+                });
+        }
         // context.subscriptions.push(vscode.window.registerWebviewViewProvider("projects", new MyWebviewViewProvider(context)));
         // vscode.window.registerTreeDataProvider("projectsData", new KanbanProjectsProvider());
         vscode.window.createTreeView("kanban.projects", {
@@ -91,9 +100,12 @@ export function activate(context: vscode.ExtensionContext) {
                         vscode.window.showInformationMessage("No workspace open");
                         return;
                 }
-                const projectsFilePath = path.join(workspaceRoot, "Projects.md");
+                const projectsFilePath = path.join(workspaceRoot, KANBAN_FILE);
 
-                fs.writeFileSync(projectsFilePath, "# Project One\n\n# Project Two");
+                let projects = [{ title: "Project One" }, { title: "Project Two" }];
+
+                fs.writeFileSync(projectsFilePath, JSON.stringify(projects));
+
                 vscode.window.showInformationMessage("Projects file created");
         });
 
