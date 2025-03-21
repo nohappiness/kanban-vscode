@@ -5,9 +5,10 @@ on:
                 tags:
                         - "v*" # 匹配所有以 "v" 开头的 tag（如 v1.0.0）
                 branches:
-                        - master
+                        - develop
                         - release
-
+permissions:
+        contents: write
 jobs:
         build-and-publish:
                 runs-on: ubuntu-latest
